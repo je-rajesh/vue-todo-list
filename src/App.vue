@@ -1,13 +1,12 @@
 <template>
-  <div id="app">
-  
+  <div id="app" class="container">
     <!-- to show routes here just uncomment following lines.  -->
     <!-- <router-link to="home">Home</router-link> | 
     <router-link to="about">About</router-link> -->
-   
-    <router-view />
+
     <!-- <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <router-view />
   </div>
 </template>
 
@@ -15,10 +14,9 @@
 // import HelloWorld from './components/HelloWorld.vue'
 
 export default {
-  name: 'App',
-  components: {
-  }
-}
+  name: "App",
+  components: {},
+};
 </script>
 
 <style>
@@ -26,7 +24,7 @@ export default {
   box-sizing: border-box;
 }
 
-.container{
+.container {
   max-width: 600px;
   margin: 0 auto;
 }
@@ -38,11 +36,7 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  font-size: 1.2rem;
 }
 
-.img-adjustable{
-  display: block;
-  margin: 20px auto;
-  height: 80px;
-}
 </style>
