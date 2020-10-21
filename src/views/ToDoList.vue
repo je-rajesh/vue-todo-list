@@ -13,17 +13,16 @@
     <transition-group
       name="fade"
       enter-active-class="animate__animated animate__fadeInUp"
-      leave-active-class="animate__animated animate__fadeOutDown"
     >
       <div v-for="(todo, index) in todosFiltered" :key="index">
         <div class="todo-item">
           <div class="todo-item-left">
             <input type="checkbox" v-model="todo.completed" />
             <div
-              class="todo-item-label"
               v-if="!todo.editing"
               @dblclick="editTodo(todo)"
-              :class="{ completed: todo.completed }"
+              :class="{ completed: todo.completed, 'animate__animated animate__fadeOutDown': !isPresent(todo)  }"
+              class="todo-item-label"
             >
               {{ todo.title }}
             </div>
@@ -154,6 +153,13 @@ export default {
 
       this.todos.push(a);
       this.newTodo = "";
+    },
+
+    isPresent(todo){
+        for(let i = 0; i< this.todos.length; i++) {
+            if(this.todos[i] === todo) return true;
+        }
+        return false;
     },
 
     removeTodo(id) {
