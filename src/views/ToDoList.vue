@@ -13,34 +13,18 @@
     <transition-group
       name="fade"
       enter-active-class="animate__animated animate__fadeInUp"
+      leave-active-class="animate__animated animate__fadeOutDown"
     >
-      <div v-for="(todo, index) in todosFiltered" :key="index">
-        <div class="todo-item">
-          <div class="todo-item-left">
-            <input type="checkbox" v-model="todo.completed" />
-            <div
-              v-if="!todo.editing"
-              @dblclick="editTodo(todo)"
-              :class="{ completed: todo.completed, 'animate__animated animate__fadeOutDown': !isPresent(todo)  }"
-              class="todo-item-label"
-            >
-              {{ todo.title }}
-            </div>
-            <input
-              type="text"
-              v-model="todo.title"
-              class="todo-item-edit"
-              v-else
-              @blur="doneEditing(todo)"
-              @keyup.enter="doneEditing(todo)"
-              @keyup.esc="cancelEditing(todo)"
-              v-focus
-            />
-            <div></div>
-          </div>
-          <div class="remove-todo" @click="removeTodo(index)">&times;</div>
-        </div>
-      </div>
+      <ToDo
+        v-for="(todo, index) in todosFiltered"
+        :key="index"
+        :todo="todo"
+        :index="index"
+        :checkAll="!anyremaining"
+        @doneEditing="doneEditing"
+        @removeTodo="removeTodo"
+        @setCompleted="setCompleted"
+      />
     </transition-group>
 
     <div class="extra-container">
@@ -88,8 +72,12 @@
 </template>
 
 <script>
+import ToDo from "../components/ToDo";
 export default {
   name: "TodoList",
+  components: {
+    ToDo,
+  },
   data() {
     return {
       newTodo: "",
@@ -109,7 +97,13 @@ export default {
         },
       ],
       filter: "all",
+      index: 0,
     };
+  },
+
+  mounted() {
+    this.index =
+      this.todos.sort((a, b) => a.id - b.id)[this.todos.length - 1].id + 1;
   },
 
   computed: {
@@ -145,7 +139,7 @@ export default {
       }
 
       var a = {
-        id: this.todos.length + 1,
+        id: this.index++,
         title: this.newTodo,
         completed: false,
         editing: false,
@@ -155,36 +149,22 @@ export default {
       this.newTodo = "";
     },
 
-    isPresent(todo){
-        for(let i = 0; i< this.todos.length; i++) {
-            if(this.todos[i] === todo) return true;
-        }
-        return false;
+    isPresent(todo) {
+      for (let i = 0; i < this.todos.length; i++) {
+        if (this.todos[i] === todo) return true;
+      }
+      return false;
     },
 
     removeTodo(id) {
       this.todos.splice(id, 1);
     },
 
-    toggleEditing(todo) {
-      todo.editing = !todo.editing;
+    doneEditing(title, key) {
+      console.log(title, key);
+      this.todos[key].title = title;
     },
 
-    doneEditing(todo) {
-      if (todo.title.trim() === "") {
-        todo.title = this.cacheTodo.title;
-      }
-      todo.editing = false;
-    },
-
-    editTodo(todo) {
-      this.cacheTodo = Object.assign({}, todo);
-      todo.editing = true;
-    },
-    cancelEditing(todo) {
-      todo.title = this.cacheTodo.title;
-      todo.editing = false;
-    },
 
     checkAllTodo() {
       this.todos.forEach((item) => (item.completed = event.target.checked));
@@ -193,14 +173,9 @@ export default {
     clearCompleted() {
       this.todos = this.todos.filter((item) => !item.completed);
     },
-  },
 
-  directives: {
-    focus: {
-      // directive definition
-      inserted: function (el) {
-        el.focus();
-      },
+    setCompleted(value, index) {
+      this.todos[index].completed = value;
     },
   },
 };
@@ -221,8 +196,7 @@ export default {
   padding: 10px 10px;
   font-size: 18px;
   margin-bottom: 16px;
-animate__
-  &:focus {
+  animate__ &:focus {
     outline: 0;
   }
 }
@@ -232,6 +206,7 @@ animate__
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition-duration: 0.2s;
 }
 
 .remove-todo {
