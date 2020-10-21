@@ -10,33 +10,39 @@
       @keyup.enter="addNewTodo"
     />
 
-    <div v-for="(todo, index) in todosFiltered" :key="index">
-      <div class="todo-item">
-        <div class="todo-item-left">
-          <input type="checkbox" v-model="todo.completed" />
-          <div
-            class="todo-item-label"
-            v-if="!todo.editing"
-            @dblclick="editTodo(todo)"
-            :class="{ completed: todo.completed }"
-          >
-            {{ todo.title }}
+    <transition-group
+      name="fade"
+      enter-active-class="animate__animated animate__fadeInUp"
+      leave-active-class="animate__animated animate__fadeOutDown"
+    >
+      <div v-for="(todo, index) in todosFiltered" :key="index">
+        <div class="todo-item">
+          <div class="todo-item-left">
+            <input type="checkbox" v-model="todo.completed" />
+            <div
+              class="todo-item-label"
+              v-if="!todo.editing"
+              @dblclick="editTodo(todo)"
+              :class="{ completed: todo.completed }"
+            >
+              {{ todo.title }}
+            </div>
+            <input
+              type="text"
+              v-model="todo.title"
+              class="todo-item-edit"
+              v-else
+              @blur="doneEditing(todo)"
+              @keyup.enter="doneEditing(todo)"
+              @keyup.esc="cancelEditing(todo)"
+              v-focus
+            />
+            <div></div>
           </div>
-          <input
-            type="text"
-            v-model="todo.title"
-            class="todo-item-edit"
-            v-else
-            @blur="doneEditing(todo)"
-            @keyup.enter="doneEditing(todo)"
-            @keyup.esc="cancelEditing(todo)"
-            v-focus
-          />
-          <div></div>
+          <div class="remove-todo" @click="removeTodo(index)">&times;</div>
         </div>
-        <div class="remove-todo" @click="removeTodo(index)">&times;</div>
       </div>
-    </div>
+    </transition-group>
 
     <div class="extra-container">
       <div>
@@ -71,13 +77,13 @@
         </button>
       </div>
 
-        <div>
-            <transition name="fade">
-                <button v-if="showClearButton" @click="clearCompleted">
-                    clear completed
-                </button>
-            </transition>
-        </div>
+      <div>
+        <transition name="fade">
+          <button v-if="showClearButton" @click="clearCompleted">
+            clear completed
+          </button>
+        </transition>
+      </div>
     </div>
   </div>
 </template>
@@ -116,18 +122,20 @@ export default {
       return this.remaining != 0;
     },
 
-    todosFiltered(){
-        var t = [];
-        if(this.filter == 'all') t = this.todos;
-        else if(this.filter == 'remaining') t = this.todos.filter(todo => !todo.completed);
-        else if(this.filter == 'completed') t = this.todos.filter( item => item.completed );
+    todosFiltered() {
+      var t = [];
+      if (this.filter == "all") t = this.todos;
+      else if (this.filter == "remaining")
+        t = this.todos.filter((todo) => !todo.completed);
+      else if (this.filter == "completed")
+        t = this.todos.filter((item) => item.completed);
 
-        return t;
-    }, 
+      return t;
+    },
 
-    showClearButton(){
-        return this.todos.filter(item=>item.completed).length > 0;
-    }
+    showClearButton() {
+      return this.todos.filter((item) => item.completed).length > 0;
+    },
   },
 
   methods: {
@@ -176,11 +184,10 @@ export default {
       this.todos.forEach((item) => (item.completed = event.target.checked));
     },
 
-    clearCompleted(){
-        this.todos = this.todos.filter(item => !item.completed);
-    }
+    clearCompleted() {
+      this.todos = this.todos.filter((item) => !item.completed);
+    },
   },
-
 
   directives: {
     focus: {
@@ -195,6 +202,8 @@ export default {
 
 
 <style lang="scss">
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
 .img-adjustable {
   display: block;
   margin: 20px auto;
@@ -206,7 +215,7 @@ export default {
   padding: 10px 10px;
   font-size: 18px;
   margin-bottom: 16px;
-
+animate__
   &:focus {
     outline: 0;
   }
@@ -286,11 +295,13 @@ button {
   }
 }
 
-.fade-enter-active, .fade-leave-active {
-    transition: opacity .2s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
 }
 
-.fade-enter, .fade-leave-to {
-    opacity: 0;
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
