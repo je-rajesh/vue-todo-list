@@ -16,10 +16,10 @@
       leave-active-class="animate__animated animate__fadeOutDown"
     >
       <ToDo
-        v-for="(todo, index) in todosFiltered"
-        :key="index"
+        v-for="(todo) in todosFiltered"
+        :key="todo.id"
         :todo="todo"
-        :index="index"
+        :index="todo.id"
         :checkAll="!anyremaining"
       />
     </transition-group>
@@ -40,18 +40,18 @@
 
     <div class="extra-container">
       <div>
-        <button :class="{ active: filter == 'all' }" @click="filter = 'all'">
+        <button :class="{ active: filter == 'all' }" @click="setfilter('all')">
           All
         </button>
         <button
           :class="{ active: filter == 'remaining' }"
-          @click="filter = 'remaining'"
+          @click="setfilter('remaining')"
         >
           Remaining
         </button>
         <button
           :class="{ active: filter == 'completed' }"
-          @click="filter = 'completed'"
+          @click="setfilter('completed')"
         >
           Completed
         </button>
@@ -79,21 +79,6 @@ export default {
     return {
       newTodo: "",
       cacheTodo: {},
-      todos: [
-        {
-          id: 1,
-          title: "Make a Vue todo",
-          completed: false,
-          editing: false,
-        },
-        {
-          id: 2,
-          title: "Take Over the world",
-          completed: false,
-          editing: false,
-        },
-      ],
-      filter: "all",
       index: 0,
     };
   },
@@ -118,37 +103,41 @@ export default {
 
   mounted() {
     this.index =
-      this.todos.sort((a, b) => a.id - b.id)[this.todos.length - 1].id + 1;
+      this.$store.state.todos.sort((a, b) => a.id - b.id)[this.$store.state.todos.length - 1].id + 1;
   },
 
   computed: {
     remaining() {
-      return this.todos.filter((item) => !item.completed).length;
+      return this.$store.state.todos.filter((item) => !item.completed).length;
     },
 
+    filter(){
+      return this.$store.state.filter;
+    },
     anyremaining() {
       return this.remaining != 0;
     },
 
     todosFiltered() {
       var t = [];
-      if (this.filter == "all") t = this.todos;
-      else if (this.filter == "remaining")
-        t = this.todos.filter((todo) => !todo.completed);
-      else if (this.filter == "completed")
-        t = this.todos.filter((item) => item.completed);
+      if (this.$store.state.filter == "all") t = this.$store.state.todos;
+      else if (this.$store.state.filter == "remaining")
+        t = this.$store.state.todos.filter((todo) => !todo.completed);
+      else if (this.$store.state.filter == "completed")
+        t = this.$store.state.todos.filter((item) => item.completed);
 
       return t;
     },
 
     showClearButton() {
-      return this.todos.filter((item) => item.completed).length > 0;
+      return this.$store.state.todos.filter((item) => item.completed).length > 0;
     },
   },
 
   methods: {
     addNewTodo() {
-      // this.todos.push(this.newTodo);
+      // this.todos.push(this.newTodo); 
+      // changed it to use vuex store.
       if (this.newTodo.trim().length == 0) {
         return;
       }
@@ -160,37 +149,42 @@ export default {
         editing: false,
       };
 
-      this.todos.push(a);
+      this.$store.state.todos.push(a);
       this.newTodo = "";
     },
 
     isPresent(todo) {
-      for (let i = 0; i < this.todos.length; i++) {
-        if (this.todos[i] === todo) return true;
+      for (let i = 0; i < this.$store.state.todos.length; i++) {
+        if (this.$store.state.todos.todos[i] === todo) return true;
       }
       return false;
     },
 
     removeTodo(id) {
-      this.todos.splice(id, 1);
+      // this.$store.state.todos.splice(id, 1); // buggy code. 
+      this.$store.state.todos = this.$store.state.todos.filter(item => item.id !== id);
     },
 
     doneEditing(title, key) {
       console.log(title, key);
-      this.todos[key].title = title;
+      this.$store.state.todos.find(item => item.id == key).title = title;
     },
 
     checkAllTodo() {
-      this.todos.forEach((item) => (item.completed = event.target.checked));
+      this.$store.state.todos.forEach((item) => (item.completed = event.target.checked));
     },
 
     clearCompleted() {
-      this.todos = this.todos.filter((item) => !item.completed);
+      this.$store.state.todos = this.$store.state.todos.filter((item) => !item.completed);
     },
 
     setCompleted(value, index) {
-      this.todos[index].completed = value;
+      this.$store.state.todos.find(item => item.id == index).completed = value;
     },
+
+    setfilter(value) {
+      this.$store.state.filter = value;
+    }
   },
 };
 </script>
@@ -212,48 +206,6 @@ export default {
   margin-bottom: 16px;
   animate__ &:focus {
     outline: 0;
-  }
-}
-
-.todo-item {
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition-duration: 0.2s;
-}
-
-.remove-todo {
-  cursor: pointer;
-  margin-left: 14px;
-  font-size: 2rem;
-  &:hover {
-    color: red;
-  }
-}
-
-.todo-item-left {
-  display: flex;
-  align-items: center;
-}
-
-.todo-item-label {
-  padding: 10px;
-  border: 1px solid white;
-  margin-left: 12px;
-}
-
-.todo-item-edit {
-  font-size: 1.2rem;
-  color: #2c3e50;
-  margin-left: 12px;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  font-family: "Avenir", "Helvetica", Arial, sans-serif;
-
-  &:focus {
-    outline: none;
   }
 }
 
