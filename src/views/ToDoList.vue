@@ -143,7 +143,7 @@ export default {
       };
 
       // this.$store.state.todos.push(a); // mutating object directly, bad practice. 
-      this.$store.commit('addNewTodo', a);
+      this.$store.dispatch('addNewTodo', a);
       this.newTodo = '';
     },
 
