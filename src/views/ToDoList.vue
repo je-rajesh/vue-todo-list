@@ -87,7 +87,7 @@ export default {
     window.eventBus.$on("doneEditing", (title, index) =>
       this.doneEditing(title, index)
     );
-    window.eventBus.$on("removeTodo", (index) => this.removeTodo(index));
+    window.eventBus.$on("removeTodo", (index) => this.removeTodo(index)); // no need since mutating data into store directly.
     window.eventBus.$on("setCompleted", (value, index) =>
       this.setCompleted(value, index)
     );
@@ -95,7 +95,7 @@ export default {
 
   beforeDestroy() {
     window.eventBus.$off("doneEditing", this.doneEditing);
-    window.eventBus.$off("removeTodo", (index) => this.removeTodo(index));
+    window.eventBus.$off("removeTodo", this.removeTodo); // no need since mutating data into store directly.
     window.eventBus.$off("setCompleted", (value, index) =>
       this.setCompleted(value, index)
     );
@@ -108,29 +108,22 @@ export default {
 
   computed: {
     remaining() {
-      return this.$store.state.todos.filter((item) => !item.completed).length;
+      return this.$store.getters.remaining;
     },
 
     filter(){
-      return this.$store.state.filter;
+      return this.$store.getters.filter;
     },
     anyremaining() {
-      return this.remaining != 0;
+      return this.$store.getters.anyremaining;
     },
 
     todosFiltered() {
-      var t = [];
-      if (this.$store.state.filter == "all") t = this.$store.state.todos;
-      else if (this.$store.state.filter == "remaining")
-        t = this.$store.state.todos.filter((todo) => !todo.completed);
-      else if (this.$store.state.filter == "completed")
-        t = this.$store.state.todos.filter((item) => item.completed);
-
-      return t;
+      return this.$store.getters.todosFiltered;
     },
 
     showClearButton() {
-      return this.$store.state.todos.filter((item) => item.completed).length > 0;
+      return this.$store.getters.showClearButton;
     },
   },
 
@@ -149,41 +142,47 @@ export default {
         editing: false,
       };
 
-      this.$store.state.todos.push(a);
-      this.newTodo = "";
+      // this.$store.state.todos.push(a); // mutating object directly, bad practice. 
+      this.$store.commit('addNewTodo', a);
+      this.newTodo = '';
     },
 
-    isPresent(todo) {
-      for (let i = 0; i < this.$store.state.todos.length; i++) {
-        if (this.$store.state.todos.todos[i] === todo) return true;
-      }
-      return false;
-    },
+    // isPresent(todo) {
+    //   for (let i = 0; i < this.$store.state.todos.length; i++) {
+    //     if (this.$store.state.todos.todos[i] === todo) return true;
+    //   }
+    //   return false;
+    // },
 
     removeTodo(id) {
-      // this.$store.state.todos.splice(id, 1); // buggy code. 
-      this.$store.state.todos = this.$store.state.todos.filter(item => item.id !== id);
+      // this.$store.state.todos.splice(id, 1); // buggy code.
+      console.log(id);
+      // this.$store.state.todos = this.$store.state.todos.filter(item => item.id !== id);
     },
 
     doneEditing(title, key) {
       console.log(title, key);
-      this.$store.state.todos.find(item => item.id == key).title = title;
+      // this.$store.state.todos.find(item => item.id == key).title = title;
     },
 
     checkAllTodo() {
-      this.$store.state.todos.forEach((item) => (item.completed = event.target.checked));
+      // this.$store.state.todos.forEach((item) => (item.completed = event.target.checked));
+      this.$store.commit('checkAllTodos', {completedStatus : event.target.checked});
     },
 
     clearCompleted() {
-      this.$store.state.todos = this.$store.state.todos.filter((item) => !item.completed);
+      // this.$store.state.todos = this.$store.state.todos.filter((item) => !item.completed);
+      this.$store.commit('clearCompletedTodos');
     },
 
     setCompleted(value, index) {
-      this.$store.state.todos.find(item => item.id == index).completed = value;
+      console.log(value, index); 
+      // this.$store.state.todos.find(item => item.id == index).completed = value;
     },
 
     setfilter(value) {
-      this.$store.state.filter = value;
+      // this.$store.state.filter = value;
+      this.$store.commit('updateFilter', {filter: value});
     }
   },
 };

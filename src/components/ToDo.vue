@@ -4,7 +4,7 @@
       <div class="todo-item">
         <div class="todo-item-left">
           <input type="checkbox" v-model="completed" @change="setCompleted" />
-          <div v-if="!editing" @dblclick="editTodo" class="todo-item-label">
+          <div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{'completed': this.completed}">
             {{ title }}
           </div>
           <input
@@ -66,7 +66,7 @@ export default {
       completed: this.todo.completed,
       cachedTitle: "", // initially empty string, later value will be give.
       editing: false,
-      id: this.id,
+      id: this.todo.id,
     };
   },
 
@@ -82,10 +82,15 @@ export default {
       }
       this.editing = false;
       window.eventBus.$emit("doneEditing", this.title, this.index);
+      // this.$store.state.todos.find(item => item.id == this.id).title = this.title; // directly mutating 
+      this.$store.commit('updateTodoTitle', {id: this.id, title: this.title});
     },
 
     removeTodo() {
-      window.eventBus.$emit("removeTodo", this.index);
+      window.eventBus.$emit("removeTodo", this.index); // No need since we have now access to global store . 
+      // this.$store.state.todos = this.$store.state.todos.filter(item => item.id !== this.id); // removed because directly mutating state 
+      // instead following should be done. 
+      this.$store.commit('removeTodo', this.id);
     },
 
     cancelEditing() {
@@ -96,6 +101,9 @@ export default {
     setCompleted() {
       this.completed = event.target.checked;
       window.eventBus.$emit("setCompleted", this.completed, this.index);
+      // this.$store.state.todos.find(item => item.id == this.id).completed = this.completed;
+      this.$store.commit('setCompleted',{id: this.id, completed: this.completed});
+
     },
   },
   directives: {
