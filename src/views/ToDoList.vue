@@ -21,9 +21,6 @@
         :todo="todo"
         :index="index"
         :checkAll="!anyremaining"
-        @doneEditing="doneEditing"
-        @removeTodo="removeTodo"
-        @setCompleted="setCompleted"
       />
     </transition-group>
 
@@ -101,6 +98,24 @@ export default {
     };
   },
 
+  created() {
+    window.eventBus.$on("doneEditing", (title, index) =>
+      this.doneEditing(title, index)
+    );
+    window.eventBus.$on("removeTodo", (index) => this.removeTodo(index));
+    window.eventBus.$on("setCompleted", (value, index) =>
+      this.setCompleted(value, index)
+    );
+  },
+
+  beforeDestroy() {
+    window.eventBus.$off("doneEditing", this.doneEditing);
+    window.eventBus.$off("removeTodo", (index) => this.removeTodo(index));
+    window.eventBus.$off("setCompleted", (value, index) =>
+      this.setCompleted(value, index)
+    );
+  },
+
   mounted() {
     this.index =
       this.todos.sort((a, b) => a.id - b.id)[this.todos.length - 1].id + 1;
@@ -164,7 +179,6 @@ export default {
       console.log(title, key);
       this.todos[key].title = title;
     },
-
 
     checkAllTodo() {
       this.todos.forEach((item) => (item.completed = event.target.checked));

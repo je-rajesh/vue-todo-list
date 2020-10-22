@@ -3,7 +3,7 @@
     <div>
       <div class="todo-item">
         <div class="todo-item-left">
-          <input type="checkbox" v-model="completed" @change="setCompleted"/>
+          <input type="checkbox" v-model="completed" @change="setCompleted" />
           <div v-if="!editing" @dblclick="editTodo" class="todo-item-label">
             {{ title }}
           </div>
@@ -28,36 +28,36 @@
 <script>
 export default {
   props: {
-    todo:{
-        type: Object,
-        required: true
+    todo: {
+      type: Object,
+      required: true,
     },
 
     index: {
-        type: Object, 
-        required: true,
+      type: Number,
+      required: true,
     },
 
     checkAll: {
-        type: Boolean, 
-        required: true,
-    }
+      type: Boolean,
+      required: true,
+    },
   },
 
   watch: {
-      checkAll(){
-          if(this.checkAll){
-              this.completed = true;
-          } else {
-              this.completed = this.todo.completed;
-          }
-      }, 
-
-      todo(){
-          this.title = this.todo.title;
-          this.completed = this.todo.completed;
-          this.id = this.todo.id;
+    checkAll() {
+      if (this.checkAll) {
+        this.completed = true;
+      } else {
+        this.completed = this.todo.completed;
       }
+    },
+
+    todo() {
+      this.title = this.todo.title;
+      this.completed = this.todo.completed;
+      this.id = this.todo.id;
+    },
   },
 
   data() {
@@ -81,22 +81,22 @@ export default {
         this.title = this.cachedTitle;
       }
       this.editing = false;
-      this.$emit("doneEditing", this.title, this.index);
+      window.eventBus.$emit("doneEditing", this.title, this.index);
     },
 
     removeTodo() {
-      this.$emit("removeTodo", this.index);
+      window.eventBus.$emit("removeTodo", this.index);
     },
 
-    cancelEditing(){
-        this.title = this.cachedTitle;
-        this.editing = false;
-    }, 
+    cancelEditing() {
+      this.title = this.cachedTitle;
+      this.editing = false;
+    },
 
-    setCompleted(){
-        this.completed = event.target.checked;
-        this.$emit('setCompleted', this.completed, this.index);
-    }
+    setCompleted() {
+      this.completed = event.target.checked;
+      window.eventBus.$emit("setCompleted", this.completed, this.index);
+    },
   },
   directives: {
     focus: {

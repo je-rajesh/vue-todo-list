@@ -5,6 +5,8 @@ import ToDoList from './views/ToDoList.vue'
 
 Vue.config.productionTip = false;
 
+window.eventBus = new Vue();
+
 new Vue({
     router,
     components: {
